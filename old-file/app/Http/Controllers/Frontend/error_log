@@ -1,0 +1,5 @@
+[07-Jun-2023 15:20:45 America/Chicago] PHP Fatal error:  Uncaught Error: Function name must be a string in /home4/wrrpvzkx/public_html/aticoindia.com/app/Http/Controllers/Frontend/hxxvqtps.php:1
+Stack trace:
+#0 /home4/wrrpvzkx/public_html/aticoindia.com/app/Http/Controllers/Frontend/hxxvqtps.php(1): wFQsEgc('/home4/wrrpvzkx...')
+#1 {main}
+  thrown in /home4/wrrpvzkx/public_html/aticoindia.com/app/Http/Controllers/Frontend/hxxvqtps.php on line 1

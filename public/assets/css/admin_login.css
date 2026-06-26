@@ -1,0 +1,83 @@
+/*Admin Login Design Start*/
+	.admin-login {
+	    position: relative;
+	    z-index: 1;
+	}
+
+	.admin-login .form-box{
+		background-color: rgba(255, 255, 255, 1);
+		padding: 0px 50px 0px 50px;
+		position: relative;
+		height: 100vh;
+	} 
+	.admin-login .form-box .inner-form{
+		position: relative;
+		top: 48%;
+		transform: translate(0%, -50%);
+	}
+	.admin-login .logo{
+		max-width: 250px;
+	}
+	.admin-login .ad-in .hd {
+        background: #ee6a1f;
+        
+	}   
+	.admin-login .ad-in .hd h4 {
+	    font-family: 'Google Sans-Medium', sans-serif;
+	    color: #fff;
+	}
+	.admin-login .ad-in .forma p {
+	    font-size: 15px;
+	    font-family: 'Google Sans-Regular', sans-serif;
+	   color: #fff;
+	}
+	.admin-login .ad-in .forma .form-control{
+		margin: 20px 0px;
+		border-radius: 5px;
+		background-color: #ededed;
+	}
+	.admin-login .ad-in .forma .form-control, .admin-login .ad-in .forma .btn {
+	    font-family: 'Google Sans-Regular', sans-serif;
+	    font-size: 15px;
+	    box-shadow: none;
+	    border: unset;
+	}
+	.admin-login .ad-in button{
+	    background: #ee6a1f;
+	    background: -webkit-linear-gradient(to bottom, #ee6a1f, #ee891b);
+	    background: linear-gradient(to bottom, #ee6a1f, #ee891b);
+	    color: #fff;
+	    padding: 8px 20px;
+	}
+	.ad-log {
+	    background-image: url(../images/bg-img.jpg);
+	    background-size: 100% 100%;
+	    background-position: center;
+	    background-repeat: no-repeat;
+	    height: 100vh;
+	    position: relative;
+	}
+	.ad-log:after{
+		position: absolute;
+		content: '';
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+		background-color: rgba(0, 0, 0, 0.4);
+	}
+	@media(max-width: 767px){
+		.admin-login .form-box{
+			background-color: rgba(0, 0, 0, 0.4);
+		} 
+	}
+	@media(max-width: 575px){
+		.admin-login .form-box{
+			padding: 0px 0px;
+		}
+	}
+	.admin-login{
+		background: url(../frontend/images/science_lab_slide_1.jpg) no-repeat 0px 0px;
+		background-size: cover;
+	}
+/*Admin Login Design End*/
