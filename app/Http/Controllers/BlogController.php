@@ -12,7 +12,7 @@ class BlogController extends Controller
             ->whereNull('deleted_at')
             ->where('status', 1)
             ->latest('id')
-            ->paginate(12);
+            ->paginate(15);
 
             $groups = \App\Models\Group::where('status', 1)->orderBy('sort', 'asc')->select('id', 'route', 'sort', 'name')->get();
             if(count($groups)>0){
@@ -44,6 +44,14 @@ class BlogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $recentPosts = Blog::query()
+            ->whereNull('deleted_at')
+            ->where('status', 1)
+            ->where('id', '!=', $blog->id)
+            ->latest('id')
+            ->limit(5)
+            ->get(['id', 'name', 'slug', 'image', 'img_alt', 'created_at']);
+
             $groups = \App\Models\Group::where('status', 1)->orderBy('sort', 'asc')->select('id', 'route', 'sort', 'name')->get();
             if(count($groups)>0){
                 foreach ($groups as $key => $group) {
@@ -64,6 +72,6 @@ class BlogController extends Controller
                 }
             }
 
-        return view('blog.show', compact('blog', 'groups'));
+        return view('blog.show', compact('blog', 'groups', 'recentPosts'));
     }
 }

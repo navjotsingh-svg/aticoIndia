@@ -145,7 +145,11 @@
                         @endif
                         <div class="blog-card-body">
                             <div class="blog-meta">{{ optional($blog->created_at)->format('M d, Y') }}</div>
-                            <h3>{{ $blog->name }}</h3>
+                            @if ($blog->slug)
+                                <h3><a href="{{ route('blog.show', $blog->slug) }}">{{ $blog->name }}</a></h3>
+                            @else
+                                <h3>{{ $blog->name }}</h3>
+                            @endif
                             @if ($blog->slug)
                                 <a class="blog-read-more" href="{{ route('blog.show', $blog->slug) }}">Read more</a>
                             @endif
