@@ -50,7 +50,6 @@
             <nav class="header-links" aria-label="Main">
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('about') }}">About Us</a>
-                <a href="{{ route('categories.index') }}">Categories</a>
                 <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
                 <a href="{{ route('blog.index') }}">Blog</a>
                 <a href="{{ route('faq') }}">FAQ</a>
@@ -64,7 +63,6 @@
         <nav class="header-links header-links--mobile" aria-label="Main navigation">
             <a href="{{ route('home') }}">Home</a>
             <a href="{{ route('about') }}">About Us</a>
-            <a href="{{ route('categories.index') }}">Categories</a>
             <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
             <a href="{{ route('blog.index') }}">Blog</a>
             <a href="{{ route('faq') }}">FAQ</a>
