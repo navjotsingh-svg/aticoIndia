@@ -109,7 +109,10 @@ class CatalogController extends Controller
                 )
                 ->get();
 
-            $categoryIdsForProducts = [(int) $category->id];
+            $categoryIdsForProducts = $this->categoryIdsForProductListing(
+                (int) $category->id,
+                $childCategories
+            );
         } else {
             $childCategories = Category::query()
                 ->whereNull('deleted_at')
@@ -118,10 +121,10 @@ class CatalogController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'name', 'short_name', 'slug', 'description', 'image', 'img_alt']);
 
-            $categoryIdsForProducts = array_values(array_unique(array_merge(
-                [$category->id],
-                $this->descendantCategoryIds((int) $category->id)
-            )));
+            $categoryIdsForProducts = $this->categoryIdsForProductListing(
+                (int) $category->id,
+                $childCategories
+            );
         }
 
         $productIds = DB::table('product_categories')
@@ -238,6 +241,46 @@ class CatalogController extends Controller
             }
 
         return view('catalog.product', compact('product', 'groups'));
+    }
+
+    /**
+     * Use products from the category itself; if none exist, include subcategory trees.
+     *
+     * @param  \Illuminate\Support\Collection<int, object>|array<int, object>  $childCategories
+     * @return array<int, int>
+     */
+    private function categoryIdsForProductListing(int $categoryId, $childCategories): array
+    {
+        $hasDirectProducts = DB::table('product_categories')
+            ->where('category_id', $categoryId)
+            ->exists();
+
+        if ($hasDirectProducts) {
+            return [$categoryId];
+        }
+
+        $childIds = collect($childCategories)
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->values()
+            ->all();
+
+        if ($childIds === []) {
+            return [$categoryId];
+        }
+
+        $subcategoryTreeIds = [];
+
+        foreach ($childIds as $childId) {
+            $subcategoryTreeIds[] = $childId;
+            $subcategoryTreeIds = array_merge(
+                $subcategoryTreeIds,
+                $this->descendantCategoryIds($childId)
+            );
+        }
+
+        return array_values(array_unique($subcategoryTreeIds));
     }
 
     /**
