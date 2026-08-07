@@ -24,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::defaultView('vendor.pagination.atico');
 
+        View::share('countries', countriesList());
+
         $catalogNav = function ($view): void {
             $allCategories = Category::query()
                 ->whereNull('deleted_at')
@@ -57,7 +59,6 @@ class AppServiceProvider extends ServiceProvider
                 'menuCategories' => $menuCategories,
                 'footerCategories' => $footerCategories,
                 'groups' => getGroups(),
-                'countries' => countriesList(),
                 'sidebarCategories' => sidebarCategories(),
             ]);
         };
@@ -67,6 +68,11 @@ class AppServiceProvider extends ServiceProvider
             'home',
             'catalog.*',
             'blog.*',
+            'contact',
+            'faq',
+            'lab-tenders',
+            'terms-service',
+            'certificates',
         ], $catalogNav);
     }
 }

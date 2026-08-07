@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Blog;
 use App\Models\Category;
+use App\Models\Faq;
 use App\Models\Product;
 
 class HomeController extends Controller
@@ -54,5 +55,35 @@ class HomeController extends Controller
             ],
             'groups' => $groups,
         ]);
+    }
+
+    public function faq()
+    {
+        $faqs = Faq::query()
+            ->where('status', 1)
+            ->orderByDesc('id')
+            ->get();
+
+        return view('faq', compact('faqs'));
+    }
+
+    public function labTenders()
+    {
+        return view('lab-tenders');
+    }
+
+    public function contact()
+    {
+        return view('contact');
+    }
+
+    public function terms()
+    {
+        return view('terms-service');
+    }
+
+    public function certificates()
+    {
+        return view('certificates');
     }
 }

@@ -10,11 +10,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/font-awesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=23">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=31">
 </head>
 @php
     $currentSlug = request()->route('slug');
-    $isCatalogPage = request()->routeIs('category.show', 'products.show', 'products.index', 'categories.index', 'group.categories', 'blog.*');
+    $isCatalogPage = request()->routeIs('category.show', 'products.show', 'products.index', 'categories.index', 'group.categories', 'blog.*', 'faq', 'contact', 'terms', 'certificates');
 @endphp
 <body class="@trim(trim($__env->yieldContent('body_class')) . ($isCatalogPage ? ' page-catalog' : ''))">
 <header class="site-header">
@@ -24,10 +24,6 @@
                 <a href="tel:+919996186555"><i class="fa fa-phone"></i> +91-9996186555</a>
                 <a href="tel:+919896793832">+91-9896793832</a>
                 <a href="mailto:sales@aticoindia.com"><i class="fa fa-envelope-o"></i> sales@aticoindia.com</a>
-            </div>
-            <div class="header-quicklinks">
-                <a href="{{ route('categories.index') }}">OEM &amp; Tenders</a>
-                <a href="{{ route('home') }}#quote">Get Quote</a>
             </div>
         </div>
     </div>
@@ -54,10 +50,12 @@
             <nav class="header-links" aria-label="Main">
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('categories.index') }}">Categories</a>
+                <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
                 <a href="{{ route('blog.index') }}">Blog</a>
-                <a href="{{ route('home') }}#quote">Contact</a>
+                <a href="{{ route('faq') }}">FAQ</a>
+                <a href="{{ route('contact') }}">Contact</a>
             </nav>
-            <a href="{{ route('home') }}#quote" class="btn btn-header-cta">Request Quote</a>
+            <button type="button" class="btn btn-header-cta" data-open-enquiry-modal>Request Quote</button>
         </div>
     </div>
 
@@ -65,9 +63,11 @@
         <nav class="header-links header-links--mobile" aria-label="Main navigation">
             <a href="{{ route('home') }}">Home</a>
             <a href="{{ route('categories.index') }}">Categories</a>
+            <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
             <a href="{{ route('blog.index') }}">Blog</a>
-            <a href="{{ route('home') }}#quote">Contact</a>
-            <a href="{{ route('home') }}#quote" class="btn btn-header-cta btn-header-cta--mobile">Request Quote</a>
+            <a href="{{ route('faq') }}">FAQ</a>
+            <a href="{{ route('contact') }}">Contact</a>
+            <button type="button" class="btn btn-header-cta btn-header-cta--mobile" data-open-enquiry-modal>Request Quote</button>
         </nav>
 
     @if(!empty($groups) && count($groups))
@@ -208,9 +208,12 @@
             <p class="footer-tagline">Educational &amp; scientific lab equipment manufacturer, supplier &amp; exporter.</p>
             <div class="bottom-links">
                 <a href="{{ route('home') }}">About</a>
-                <a href="{{ route('categories.index') }}">Lab Tenders</a>
+                <a href="{{ route('certificates') }}">Certificates</a>
+                <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
                 <a href="{{ route('blog.index') }}">Blog</a>
-                <a href="{{ route('home') }}#quote">Contact</a>
+                <a href="{{ route('faq') }}">FAQ</a>
+                <a href="{{ route('terms') }}">Terms &amp; Privacy</a>
+                <a href="{{ route('contact') }}">Contact</a>
             </div>
         </div>
         <div class="social-links">
@@ -226,6 +229,8 @@
         <div class="copyright">Copyright &copy; {{ date('Y') }} Atico India. All rights reserved.</div>
     </div>
 </footer>
+
+@include('partials.enquiry-modal')
 
 @stack('scripts')
 <script>
@@ -354,6 +359,63 @@
     });
 })();
 </script>
+<script>
+(() => {
+    const modal = document.getElementById('enquiryModal');
+    if (!modal) return;
+
+    const open = () => {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('modal-open');
+    };
+
+    const close = () => {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('modal-open');
+    };
+
+    window.openEnquiryModal = open;
+
+    document.querySelectorAll('[data-open-enquiry-modal]').forEach((trigger) => {
+        trigger.addEventListener('click', (event) => {
+            event.preventDefault();
+            open();
+            document.body.classList.remove('nav-open');
+        });
+    });
+
+    modal.querySelectorAll('[data-close-enquiry]').forEach((el) => {
+        el.addEventListener('click', close);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+            close();
+        }
+    });
+
+    if (window.location.hash === '#quote') {
+        open();
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+
+    @if($errors->hasAny(['name', 'email', 'mobile_no', 'country', 'message', 'g-recaptcha-response']))
+        open();
+    @endif
+})();
+</script>
+@if(request()->routeIs('home'))
+<script>
+(() => {
+    const fab = document.getElementById('enquiryFab');
+    if (!fab || typeof window.openEnquiryModal !== 'function') return;
+    fab.addEventListener('click', window.openEnquiryModal);
+    setTimeout(window.openEnquiryModal, 10000);
+})();
+</script>
+@endif
 @if(config('inquiry.recaptcha_site_key'))
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 @endif

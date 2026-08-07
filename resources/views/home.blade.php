@@ -188,31 +188,10 @@
         </div>
     </section> -->
 
-    <button type="button" class="enquiry-fab" id="enquiryFab">Send Enquiry</button>
-    <div class="enquiry-modal" id="enquiryModal" aria-hidden="true">
-        <div class="enquiry-modal-backdrop" data-close-modal="1"></div>
-        <div class="enquiry-modal-card">
-            <button type="button" class="enquiry-modal-close" id="enquiryModalClose" aria-label="Close">&times;</button>
-            <h3>Send Enquiry</h3>
-            <p class="muted">Share your requirement and our team will contact you.</p>
-            <form method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data">
-                @csrf
-                @include('partials.inquiry-meta')
-                <input class="input" name="name" placeholder="Name" required>
-                <input class="input" name="email" placeholder="Email">
-                <input class="input" name="mobile_no" placeholder="Phone">
-                <select class="input" name="country">
-                    <option value="">Select country</option>
-                    @foreach($countries as $country)
-                        <option value="{{ $country }}">{{ $country }}</option>
-                    @endforeach
-                </select>
-                <textarea name="message" rows="4" placeholder="Message"></textarea>
-                @include('partials.inquiry-attachment')
-                <button class="btn btn-block" type="submit">Submit</button>
-            </form>
-        </div>
-    </div>
+    <button type="button" class="enquiry-fab" id="enquiryFab" aria-label="Send enquiry">
+        <i class="fa fa-commenting-o" aria-hidden="true"></i>
+        <span>Send Enquiry</span>
+    </button>
 @endsection
 
 @push('scripts')
@@ -231,19 +210,6 @@
     };
     setInterval(() => go((i + 1) % slides.length), 5000);
     dots.forEach((d, n) => d.addEventListener('click', () => go(n)));
-})();
-
-(() => {
-    const modal = document.getElementById('enquiryModal');
-    const openBtn = document.getElementById('enquiryFab');
-    const closeBtn = document.getElementById('enquiryModalClose');
-    if (!modal || !openBtn || !closeBtn) return;
-    const open = () => { modal.classList.add('is-open'); document.body.style.overflow = 'hidden'; };
-    const close = () => { modal.classList.remove('is-open'); document.body.style.overflow = ''; };
-    openBtn.addEventListener('click', open);
-    closeBtn.addEventListener('click', close);
-    modal.addEventListener('click', e => { if (e.target?.dataset?.closeModal === '1') close(); });
-    setTimeout(open, 10000);
 })();
 </script>
 @endpush
