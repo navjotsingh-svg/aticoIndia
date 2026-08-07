@@ -73,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
             'lab-tenders',
             'terms-service',
             'certificates',
+            'about',
         ], $catalogNav);
     }
 }

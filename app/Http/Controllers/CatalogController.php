@@ -33,6 +33,10 @@ class CatalogController extends Controller
             ->where('status', 1)
             ->findOrFail($id);
 
+        if (! empty($group->route)) {
+            return redirect()->route('category.show', $group->route, 301);
+        }
+
         $categories = GroupCategory::query()
             ->join('categories', 'group_categories.category_id', '=', 'categories.id')
             ->where('group_categories.group_id', $group->id)
@@ -50,7 +54,26 @@ class CatalogController extends Controller
             )
             ->get();
 
-        return view('catalog.group-categories', compact('categories', 'group'));
+        $groupContent = null;
+
+        if (! empty($group->route)) {
+            $groupContent = Category::query()
+                ->whereNull('deleted_at')
+                ->where('status', 1)
+                ->where('slug', $group->route)
+                ->first([
+                    'id',
+                    'name',
+                    'slug',
+                    'description',
+                    'image',
+                    'img_alt',
+                    'meta_title',
+                    'meta_description',
+                ]);
+        }
+
+        return view('catalog.group-categories', compact('categories', 'group', 'groupContent'));
     }
 
     public function category(Request $request, string $slug)
@@ -61,9 +84,51 @@ class CatalogController extends Controller
             ->where('slug', $slug)
             ->firstOrFail();
 
+        $menuGroup = Group::query()
+            ->where('status', 1)
+            ->where('route', $slug)
+            ->first();
+
+        $isGroupLanding = $menuGroup !== null;
+
+        if ($isGroupLanding) {
+            $childCategories = GroupCategory::query()
+                ->join('categories', 'group_categories.category_id', '=', 'categories.id')
+                ->where('group_categories.group_id', $menuGroup->id)
+                ->where('categories.status', 1)
+                ->whereNull('categories.deleted_at')
+                ->orderBy('categories.sort')
+                ->select(
+                    'categories.id',
+                    'categories.name',
+                    'categories.short_name',
+                    'categories.slug',
+                    'categories.description',
+                    'categories.image',
+                    'categories.img_alt',
+                )
+                ->get();
+
+            $categoryIdsForProducts = [(int) $category->id];
+        } else {
+            $childCategories = Category::query()
+                ->whereNull('deleted_at')
+                ->where('status', 1)
+                ->where('parent_id', $category->id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'short_name', 'slug', 'description', 'image', 'img_alt']);
+
+            $categoryIdsForProducts = array_values(array_unique(array_merge(
+                [$category->id],
+                $this->descendantCategoryIds((int) $category->id)
+            )));
+        }
+
         $productIds = DB::table('product_categories')
-            ->where('category_id', $category->id)
-            ->pluck('product_id');
+            ->whereIn('category_id', $categoryIdsForProducts)
+            ->pluck('product_id')
+            ->unique()
+            ->values();
 
         $search = trim((string) $request->query('search', ''));
 
@@ -82,14 +147,7 @@ class CatalogController extends Controller
             ->paginate(24)
             ->withQueryString();
 
-        $childCategories = Category::query()
-            ->whereNull('deleted_at')
-            ->where('status', 1)
-            ->where('parent_id', $category->id)
-            ->orderBy('name')
-            ->get(['id', 'name', 'short_name', 'slug', 'description', 'image', 'img_alt']);
-
-            $groups = \App\Models\Group::where('status', 1)->orderBy('sort', 'asc')->select('id', 'route', 'sort', 'name')->get();
+        $groups = \App\Models\Group::where('status', 1)->orderBy('sort', 'asc')->select('id', 'route', 'sort', 'name')->get();
             if(count($groups)>0){
                 foreach ($groups as $key => $group) {
                     $group['categories'] = \App\Models\GroupCategory::join('categories', 'group_categories.category_id', '=', 'categories.id')
@@ -108,7 +166,7 @@ class CatalogController extends Controller
                     }
                 }
             }
-        return view('catalog.category-products', compact('category', 'products', 'search', 'groups', 'childCategories'));
+        return view('catalog.category-products', compact('category', 'products', 'search', 'groups', 'childCategories', 'isGroupLanding'));
     }
 
     public function products(Request $request)
@@ -180,5 +238,36 @@ class CatalogController extends Controller
             }
 
         return view('catalog.product', compact('product', 'groups'));
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    private function descendantCategoryIds(int $categoryId): array
+    {
+        $descendants = [];
+        $queue = [$categoryId];
+
+        while ($queue !== []) {
+            $currentId = array_shift($queue);
+
+            $children = Category::query()
+                ->whereNull('deleted_at')
+                ->where('status', 1)
+                ->where('parent_id', $currentId)
+                ->pluck('id')
+                ->all();
+
+            foreach ($children as $childId) {
+                $childId = (int) $childId;
+
+                if (! in_array($childId, $descendants, true)) {
+                    $descendants[] = $childId;
+                    $queue[] = $childId;
+                }
+            }
+        }
+
+        return $descendants;
     }
 }

@@ -33,9 +33,17 @@ page-catalog
         <div class="content-with-sidebar content-with-sidebar--catalog">
             <div class="catalog-main">
                 <p class="results-copy">
-                    Showing {{ $childCategories->count() > 0 ? $childCategories->count() : $products->total() }}
-                    result{{ ($childCategories->count() > 0 ? $childCategories->count() : $products->total()) === 1 ? '' : 's' }}
+                    @php
+                        $subcategoryCount = $childCategories->count();
+                        $productCount = $products->total();
+                        $totalCount = $subcategoryCount + $productCount;
+                    @endphp
+                    Showing {{ $totalCount }}
+                    result{{ $totalCount === 1 ? '' : 's' }}
                     for <strong>"{{ $category->name }}"</strong>
+                    @if($subcategoryCount > 0 && $productCount > 0)
+                        <span class="results-copy-detail">({{ $subcategoryCount }} subcategor{{ $subcategoryCount === 1 ? 'y' : 'ies' }}, {{ $productCount }} product{{ $productCount === 1 ? '' : 's' }})</span>
+                    @endif
                 </p>
 
                 @if(!empty($category->description) || $categoryImage !== '')
@@ -65,34 +73,42 @@ page-catalog
                 </form>
 
                 @if($childCategories->isNotEmpty())
-                    <div class="catalog-product-grid">
-                        @foreach($childCategories as $child)
-                            @php
-                                $childImage = (string) ($child->image ?? '');
-                                $childImagePath = $childImage !== ''
-                                    ? asset(ltrim(str_contains($childImage, '/') ? $childImage : 'uploads/product_images/' . $childImage, '/'))
-                                    : $noImage;
-                                $childUrl = route('category.show', $child->slug);
-                            @endphp
-                            <article class="catalog-product-card">
-                                <a href="{{ $childUrl }}" class="catalog-product-card-img">
-                                    <img
-                                        src="{{ $childImagePath }}"
-                                        alt="{{ $child->img_alt ?? $child->name }}"
-                                        loading="lazy"
-                                        onerror="this.onerror=null;this.src='{{ $noImage }}';"
-                                    >
-                                </a>
-                                <div class="catalog-product-card-body">
-                                    <h3><a href="{{ $childUrl }}">{{ $child->short_name ?: $child->name }}</a></h3>
-                                    @if(!empty($child->description))
-                                        <p class="muted">{{ \Illuminate\Support\Str::limit(trim(strip_tags($child->description)), 90) }}</p>
-                                    @endif
-                                </div>
-                            </article>
-                        @endforeach
+                    <div class="catalog-section">
+                        <h2 class="catalog-section-title">{{ !empty($isGroupLanding) ? 'Categories' : 'Subcategories' }}</h2>
+                        <div class="catalog-product-grid">
+                            @foreach($childCategories as $child)
+                                @php
+                                    $childImage = (string) ($child->image ?? '');
+                                    $childImagePath = $childImage !== ''
+                                        ? asset(ltrim(str_contains($childImage, '/') ? $childImage : 'uploads/product_images/' . $childImage, '/'))
+                                        : $noImage;
+                                    $childUrl = route('category.show', $child->slug);
+                                @endphp
+                                <article class="catalog-product-card catalog-product-card--category">
+                                    <a href="{{ $childUrl }}" class="catalog-product-card-img">
+                                        <img
+                                            src="{{ $childImagePath }}"
+                                            alt="{{ $child->img_alt ?? $child->name }}"
+                                            loading="lazy"
+                                            onerror="this.onerror=null;this.src='{{ $noImage }}';"
+                                        >
+                                    </a>
+                                    <div class="catalog-product-card-body">
+                                        <h3><a href="{{ $childUrl }}">{{ $child->short_name ?: $child->name }}</a></h3>
+                                        @if(!empty($child->description))
+                                            <p class="muted">{{ \Illuminate\Support\Str::limit(trim(strip_tags($child->description)), 90) }}</p>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
                     </div>
-                @else
+                @endif
+
+                <div class="catalog-section">
+                    @if($childCategories->isNotEmpty())
+                        <h2 class="catalog-section-title">Products</h2>
+                    @endif
                     <div class="catalog-product-grid">
                         @forelse ($products as $product)
                             @php
@@ -143,8 +159,10 @@ page-catalog
                             <div class="catalog-empty">No products found in this category.</div>
                         @endforelse
                     </div>
-                    <div class="pagination-wrap">{{ $products->links() }}</div>
-                @endif
+                    @if($products->hasPages())
+                        <div class="pagination-wrap">{{ $products->links() }}</div>
+                    @endif
+                </div>
             </div>
 
             @include('partials.catalog-sidebar')

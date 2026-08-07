@@ -7,6 +7,7 @@ use App\Http\Controllers\InquiryController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about-us', [HomeController::class, 'about'])->name('about');
 Route::get('/faq', [HomeController::class, 'faq'])->name('faq');
 Route::get('/lab-tenders', [HomeController::class, 'labTenders'])->name('lab-tenders');
 Route::get('/contact-us', [HomeController::class, 'contact'])->name('contact');

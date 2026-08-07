@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('vendor/font-awesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=31">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=37">
 </head>
 @php
     $currentSlug = request()->route('slug');
@@ -49,6 +49,7 @@
             </form>
             <nav class="header-links" aria-label="Main">
                 <a href="{{ route('home') }}">Home</a>
+                <a href="{{ route('about') }}">About Us</a>
                 <a href="{{ route('categories.index') }}">Categories</a>
                 <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
                 <a href="{{ route('blog.index') }}">Blog</a>
@@ -62,6 +63,7 @@
     <div id="site-nav-panel" class="site-nav-panel">
         <nav class="header-links header-links--mobile" aria-label="Main navigation">
             <a href="{{ route('home') }}">Home</a>
+            <a href="{{ route('about') }}">About Us</a>
             <a href="{{ route('categories.index') }}">Categories</a>
             <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
             <a href="{{ route('blog.index') }}">Blog</a>
@@ -78,7 +80,8 @@
                         @foreach($groups as $group)
                             @php
                                 $hasChildren = !empty($group->categories) && count($group->categories);
-                                $groupActive = $currentSlug && (
+                                $onGroupPage = $currentSlug && $currentSlug === ($group->route ?? '');
+                                $groupActive = $onGroupPage || ($currentSlug && (
                                     $currentSlug === $group->route
                                     || (
                                         $hasChildren
@@ -89,7 +92,7 @@
                                                 }));
                                         })
                                     )
-                                );
+                                ));
                             @endphp
                             <li class="menu-item-has-children{{ $groupActive ? ' is-current' : '' }}">
                                 <a href="{{ groupMenuUrl($group) }}">
@@ -135,7 +138,7 @@
                                         @endforeach
                                         @if($group->categories->count() > 9)
                                             <li class="sub-menu-item--more">
-                                                <a href="{{ route('group.categories', $group->id) }}">View More</a>
+                                <a href="{{ groupMenuUrl($group) }}">View More</a>
                                             </li>
                                         @endif
                                     </ul>
@@ -207,7 +210,7 @@
             <h4>Atico India</h4>
             <p class="footer-tagline">Educational &amp; scientific lab equipment manufacturer, supplier &amp; exporter.</p>
             <div class="bottom-links">
-                <a href="{{ route('home') }}">About</a>
+                <a href="{{ route('about') }}">About</a>
                 <a href="{{ route('certificates') }}">Certificates</a>
                 <a href="{{ route('lab-tenders') }}">Lab Tenders</a>
                 <a href="{{ route('blog.index') }}">Blog</a>

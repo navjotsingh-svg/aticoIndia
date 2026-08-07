@@ -32,10 +32,14 @@ function countriesList(): array
 function groupMenuUrl(object $group): string
 {
     if (($group->route ?? '') === 'global-engineering-tenders') {
-        return '#';
+        return route('lab-tenders');
     }
 
-    return route('category.show', $group->route);
+    if (! empty($group->route)) {
+        return route('category.show', $group->route);
+    }
+
+    return route('group.categories', $group->id);
 }
 
 function sidebarCategories()
