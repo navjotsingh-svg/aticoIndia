@@ -42,6 +42,22 @@ function groupMenuUrl(object $group): string
     return route('group.categories', $group->id);
 }
 
+function mediaUrl(?string $path): string
+{
+    if ($path === null || $path === '') {
+        return asset('assets/frontend/images/no_product.png');
+    }
+
+    if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+        return $path;
+    }
+
+    $path = ltrim($path, '/');
+    $encodedPath = implode('/', array_map('rawurlencode', explode('/', $path)));
+
+    return asset($encodedPath);
+}
+
 function sidebarCategories()
 {
     $cats = SidebarCategory::query()

@@ -9,14 +9,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('vendor/font-awesome/css/font-awesome.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=37">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-dN2WdVe7lFu8t2u7W/P+bHsdA/5pD+0KrF/Folh3y6UNfBKv9v4+Gao/+hrn7h4Lv4P60pIXD6UujrZOnA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=38">
 </head>
 @php
     $currentSlug = request()->route('slug');
     $isCatalogPage = request()->routeIs('category.show', 'products.show', 'products.index', 'categories.index', 'group.categories', 'blog.*', 'faq', 'contact', 'terms', 'certificates');
+    $bodyClass = trim(trim($__env->yieldContent('body_class')) . ($isCatalogPage ? ' page-catalog' : ''));
 @endphp
-<body class="@trim(trim($__env->yieldContent('body_class')) . ($isCatalogPage ? ' page-catalog' : ''))">
+<body class="{{ $bodyClass }}">
 <header class="site-header">
     <div class="header-top">
         <div class="container header-top-inner">

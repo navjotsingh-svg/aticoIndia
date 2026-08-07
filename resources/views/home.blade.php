@@ -8,14 +8,15 @@
 page-home
 @endsection
 
+@section('full_width')
+@endsection
+
 @section('content')
     <section class="home-industry-hero" aria-label="Industries we serve">
         <div class="home-industry-slider">
             @foreach ($industrySlides as $index => $slide)
                 @php
-                    $image = str_starts_with($slide['image'], 'http')
-                        ? $slide['image']
-                        : asset(ltrim($slide['image'], '/'));
+                    $image = mediaUrl($slide['image']);
                 @endphp
                 <div class="home-industry-slide {{ $index === 0 ? 'is-active' : '' }}" style="--slide-image: url('{{ $image }}')">
                     <div class="container home-industry-slide-inner">
@@ -90,10 +91,8 @@ page-home
                     @php
                         $image = (string) ($category->image ?? '');
                         $path = $image !== ''
-                            ? (str_starts_with($image, 'http')
-                                ? $image
-                                : asset(ltrim(str_contains($image, '/') ? $image : 'uploads/product_images/' . $image, '/')))
-                            : asset('assets/frontend/images/no_product.png');
+                            ? mediaUrl(str_contains($image, '/') ? $image : 'uploads/product_images/' . $image)
+                            : mediaUrl('assets/frontend/images/no_product.png');
                     @endphp
                     <a href="{{ route('category.show', $category->slug) }}" class="home-featured-card">
                         <div class="home-featured-card-img">
