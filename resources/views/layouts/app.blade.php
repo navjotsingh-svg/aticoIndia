@@ -9,13 +9,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-dN2WdVe7lFu8t2u7W/P+bHsdA/5pD+0KrF/Folh3y6UNfBKv9v4+Gao/+hrn7h4Lv4P60pIXD6UujrZOnA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=38">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=39">
 </head>
 @php
     $currentSlug = request()->route('slug');
     $isCatalogPage = request()->routeIs('category.show', 'products.show', 'products.index', 'categories.index', 'group.categories', 'blog.*', 'faq', 'contact', 'terms', 'certificates');
-    $bodyClass = trim(trim($__env->yieldContent('body_class')) . ($isCatalogPage ? ' page-catalog' : ''));
+    $sectionBodyClass = trim($__env->yieldContent('body_class'));
+    $bodyClass = $sectionBodyClass;
+    if ($isCatalogPage && ! str_contains($sectionBodyClass, 'page-catalog')) {
+        $bodyClass = trim($sectionBodyClass.' page-catalog');
+    }
 @endphp
 <body class="{{ $bodyClass }}">
 <header class="site-header">
@@ -70,6 +74,7 @@
             <a href="{{ route('contact') }}">Contact</a>
             <button type="button" class="btn btn-header-cta btn-header-cta--mobile" data-open-enquiry-modal>Request Quote</button>
         </nav>
+    </div>
 
     @if(!empty($groups) && count($groups))
         <nav class="category-strip" aria-label="Product categories">
@@ -154,7 +159,7 @@
             </div>
         </nav>
     @endif
-    </div>
+
     <div class="site-nav-backdrop" hidden></div>
 </header>
 

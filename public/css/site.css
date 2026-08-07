@@ -520,7 +520,6 @@ body.nav-open {
 .page-catalog .header-top-inner { padding: 5px 0; }
 .page-catalog .brand img { max-height: 48px; }
 .page-catalog .header-main-inner { padding: 10px 0; }
-.page-catalog .header-links { display: none; }
 
 .page-head {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
