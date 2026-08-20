@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Atico India')</title>
     <meta name="description" content="@yield('meta_description', 'Educational science lab equipment manufacturer, supplier and exporter in India and worldwide.')">
+    @if(app()->environment('local') || request()->getHost() === 'dev.aticoindia.com')
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    @endif
     <link rel="canonical" href="@yield('canonical', url()->current())">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

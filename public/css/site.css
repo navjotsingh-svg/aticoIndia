@@ -5327,7 +5327,9 @@ body.modal-open {
 .site-header{
     position: relative !important;
 }
-
+.category-strip{
+    display: none;
+}
 
 
 }
