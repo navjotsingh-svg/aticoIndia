@@ -20,9 +20,7 @@ Route::get('/group/{id}', [CatalogController::class, 'groupCategories'])->name('
 Route::get('/category/{slug}', [CatalogController::class, 'category'])->name('category.show');
 Route::get('/products', [CatalogController::class, 'products'])->name('products.index');
 Route::get('/product/{slug}', [CatalogController::class, 'product'])->name('products.show');
-Route::get('/products/{slug}', function (string $slug) {
-    return redirect()->route('products.show', $slug, 301);
-});
+Route::get('/products/{slug}', [CatalogController::class, 'redirectLegacyProduct']);
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');

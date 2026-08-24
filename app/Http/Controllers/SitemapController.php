@@ -31,7 +31,7 @@ class SitemapController extends Controller
     {
         $this->prepareBaseUrl($request);
 
-        $sitemapUrl = rtrim($this->sitemap->baseUrl(), '/').'/sitemap.xml';
+        $sitemapUrl = rtrim($this->sitemap->baseUrl($request), '/').'/sitemap.xml';
 
         $content = implode(PHP_EOL, [
             'User-agent: *',

@@ -13,6 +13,7 @@ php artisan view:clear
 php artisan config:clear
 php artisan route:clear
 php artisan cache:clear
+rm -f bootstrap/cache/routes-v7.php bootstrap/cache/routes.php
 
 echo "==> Running database migrations..."
 php artisan migrate --force

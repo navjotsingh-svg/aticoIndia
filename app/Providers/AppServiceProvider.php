@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->forgetStaleRouteCache();
     }
 
     /**
@@ -89,5 +89,24 @@ class AppServiceProvider extends ServiceProvider
                     ->get()
             );
         });
+    }
+
+    /**
+     * Drop a cached route file that predates the sitemap routes.
+     * Laravel will keep serving the old cache until it is removed.
+     */
+    private function forgetStaleRouteCache(): void
+    {
+        $cached = $this->app->getCachedRoutesPath();
+
+        if (! is_file($cached)) {
+            return;
+        }
+
+        $contents = (string) @file_get_contents($cached);
+
+        if ($contents !== '' && ! str_contains($contents, 'sitemap.index')) {
+            @unlink($cached);
+        }
     }
 }

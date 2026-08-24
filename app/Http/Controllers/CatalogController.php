@@ -213,6 +213,11 @@ class CatalogController extends Controller
         return view('catalog.products', compact('products', 'search', 'groups'));
     }
 
+    public function redirectLegacyProduct(string $slug)
+    {
+        return redirect()->route('products.show', $slug, 301);
+    }
+
     public function product(string $slug)
     {
         $product = Product::query()
