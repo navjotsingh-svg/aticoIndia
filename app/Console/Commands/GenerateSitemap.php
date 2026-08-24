@@ -10,10 +10,22 @@ class GenerateSitemap extends Command
 {
     protected $signature = 'sitemap:generate {--ping : Notify Google and Bing about the sitemap URL}';
 
-    protected $description = 'Generate XML sitemap files in public/ and update robots.txt';
+    protected $description = 'Generate static XML sitemap files in public/ (optional; /sitemap.xml is served dynamically by default)';
 
     public function handle(SitemapService $sitemap): int
     {
+        $baseUrl = $sitemap->baseUrl();
+
+        if (! $this->isPublicUrl($baseUrl)) {
+            $this->warn('APP_URL is not set to a public domain. Set APP_URL=https://dev.aticoindia.com in .env before generating static files.');
+        }
+
+        if ($this->option('ping') && ! $this->isPublicUrl($baseUrl)) {
+            $this->error('Cannot ping search engines until APP_URL is set to your live domain.');
+
+            return self::FAILURE;
+        }
+
         $directory = public_path();
 
         $written = $sitemap->writeAll($directory);
@@ -32,18 +44,23 @@ class GenerateSitemap extends Command
         );
 
         $this->info('Total URLs: '.$counts->sum());
-        $this->info('Sitemap index: '.rtrim(config('app.url'), '/').'/sitemap.xml');
+        $this->info('Sitemap index: '.rtrim($sitemap->baseUrl(), '/').'/sitemap.xml');
 
         if ($this->option('ping')) {
-            $this->pingSearchEngines();
+            $this->pingSearchEngines($sitemap);
         }
 
         return self::SUCCESS;
     }
 
-    private function pingSearchEngines(): void
+    private function isPublicUrl(string $url): bool
     {
-        $sitemapUrl = urlencode(rtrim(config('app.url'), '/').'/sitemap.xml');
+        return $url !== '' && ! preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#i', $url);
+    }
+
+    private function pingSearchEngines(SitemapService $sitemap): void
+    {
+        $sitemapUrl = urlencode(rtrim($sitemap->baseUrl(), '/').'/sitemap.xml');
         $endpoints = [
             'Google' => "https://www.google.com/ping?sitemap={$sitemapUrl}",
             'Bing' => "https://www.bing.com/ping?sitemap={$sitemapUrl}",

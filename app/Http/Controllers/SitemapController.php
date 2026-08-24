@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Services\SitemapService;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\URL;
 
 class SitemapController extends Controller
 {
@@ -11,14 +13,43 @@ class SitemapController extends Controller
         private readonly SitemapService $sitemap,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return $this->xmlResponse($this->sitemap->renderIndex());
+        $this->prepareBaseUrl($request);
+
+        return $this->xmlResponse($this->sitemap->renderIndex($request));
     }
 
-    public function section(string $type): Response
+    public function section(Request $request, string $type): Response
     {
-        return $this->xmlResponse($this->sitemap->renderSection($type));
+        $this->prepareBaseUrl($request);
+
+        return $this->xmlResponse($this->sitemap->renderSection($type, $request));
+    }
+
+    public function robots(Request $request): Response
+    {
+        $this->prepareBaseUrl($request);
+
+        $sitemapUrl = rtrim($this->sitemap->baseUrl(), '/').'/sitemap.xml';
+
+        $content = implode(PHP_EOL, [
+            'User-agent: *',
+            'Allow: /',
+            '',
+            'Sitemap: '.$sitemapUrl,
+            '',
+        ]);
+
+        return response($content, 200, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    private function prepareBaseUrl(Request $request): void
+    {
+        URL::forceRootUrl($this->sitemap->baseUrl($request));
     }
 
     private function xmlResponse(string $content): Response

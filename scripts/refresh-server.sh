@@ -17,8 +17,8 @@ php artisan cache:clear
 echo "==> Running database migrations..."
 php artisan migrate --force
 
-echo "==> Generating XML sitemap..."
-php artisan sitemap:generate
+echo "==> Removing stale static sitemap/robots files (sitemap is served dynamically)..."
+rm -f public/sitemap.xml public/sitemap-*.xml public/robots.txt
 
 echo "==> Rebuilding optimized caches (optional, for production)..."
 php artisan config:cache

@@ -7,10 +7,36 @@ use App\Models\Category;
 use App\Models\Group;
 use App\Models\Product;
 use Carbon\CarbonInterface;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\URL;
 
 class SitemapService
 {
+    public function baseUrl(?Request $request = null): string
+    {
+        $configured = rtrim((string) config('app.url'), '/');
+
+        if ($this->isPublicUrl($configured)) {
+            return $configured;
+        }
+
+        if ($request !== null) {
+            return $request->getSchemeAndHttpHost();
+        }
+
+        if (app()->runningInConsole()) {
+            return $configured !== '' ? $configured : 'http://localhost';
+        }
+
+        return rtrim((string) request()->getSchemeAndHttpHost(), '/');
+    }
+
+    public function prepareUrlRoot(?Request $request = null): void
+    {
+        URL::forceRootUrl($this->baseUrl($request));
+    }
+
     /**
      * @return array<string, Collection<int, array{loc: string, lastmod: ?string, changefreq: string, priority: string}>>
      */
@@ -27,9 +53,9 @@ class SitemapService
     /**
      * @return array<int, array{loc: string, lastmod: ?string}>
      */
-    public function indexEntries(): array
+    public function indexEntries(?Request $request = null): array
     {
-        $base = rtrim(config('app.url'), '/');
+        $base = $this->baseUrl($request);
         $now = now()->toAtomString();
 
         return collect($this->sections())
@@ -43,15 +69,19 @@ class SitemapService
             ->all();
     }
 
-    public function renderIndex(): string
+    public function renderIndex(?Request $request = null): string
     {
+        $this->prepareUrlRoot($request);
+
         return view('sitemap.index', [
-            'sitemaps' => $this->indexEntries(),
+            'sitemaps' => $this->indexEntries($request),
         ])->render();
     }
 
-    public function renderSection(string $type): string
+    public function renderSection(string $type, ?Request $request = null): string
     {
+        $this->prepareUrlRoot($request);
+
         $sections = $this->sections();
 
         if (! array_key_exists($type, $sections)) {
@@ -66,16 +96,18 @@ class SitemapService
     /**
      * @return array<string, string>
      */
-    public function writeAll(string $directory): array
+    public function writeAll(string $directory, ?Request $request = null): array
     {
         $written = [];
 
         $written['sitemap.xml'] = $this->writeFile(
             $directory.'/sitemap.xml',
-            $this->renderIndex()
+            $this->renderIndex($request)
         );
 
         foreach ($this->sections() as $type => $urls) {
+            $this->prepareUrlRoot($request);
+
             $written["sitemap-{$type}.xml"] = $this->writeFile(
                 $directory."/sitemap-{$type}.xml",
                 view('sitemap.urlset', ['urls' => $urls])->render()
@@ -85,9 +117,9 @@ class SitemapService
         return $written;
     }
 
-    public function writeRobots(string $path): void
+    public function writeRobots(string $path, ?Request $request = null): void
     {
-        $sitemapUrl = rtrim(config('app.url'), '/').'/sitemap.xml';
+        $sitemapUrl = rtrim($this->baseUrl($request), '/').'/sitemap.xml';
 
         $content = implode(PHP_EOL, [
             'User-agent: *',
@@ -237,5 +269,14 @@ class SitemapService
         file_put_contents($path, $contents);
 
         return $path;
+    }
+
+    private function isPublicUrl(string $url): bool
+    {
+        if ($url === '') {
+            return false;
+        }
+
+        return ! preg_match('#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#i', $url);
     }
 }

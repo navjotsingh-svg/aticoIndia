@@ -31,6 +31,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.i
 Route::get('/sitemap-{type}.xml', [SitemapController::class, 'section'])
     ->where('type', 'pages|categories|products|blogs')
     ->name('sitemap.section');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 Route::post('/enquiry', [InquiryController::class, 'contact'])->name('enquiry.store');
 Route::post('/product-query', [InquiryController::class, 'product'])->name('product-query.store');
