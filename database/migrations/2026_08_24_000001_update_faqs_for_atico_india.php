@@ -1,44 +1,23 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        if (! Schema::hasTable('faqs')) {
-            Schema::create('faqs', function (Blueprint $table) {
-                $table->id();
-                $table->string('name');
-                $table->text('description')->nullable();
-                $table->unsignedTinyInteger('status')->default(1);
-                $table->string('section_heading')->nullable();
-                $table->text('section_description')->nullable();
-                $table->unsignedBigInteger('created_by')->nullable();
-                $table->unsignedBigInteger('updated_by')->nullable();
-                $table->unsignedBigInteger('deleted_by')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
-            });
-        }
-
-        if (DB::table('faqs')->count() > 0) {
+        if (! DB::getSchemaBuilder()->hasTable('faqs')) {
             return;
         }
 
         $contactUrl = url('/contact-us');
         $enquiryUrl = url('/#quote');
 
-        DB::table('faqs')->insert([
+        $faqs = [
             [
                 'name' => 'What is the minimum order that we can place?',
                 'description' => 'We expect minimum orders of at least US $500. We understand that customers may need smaller sample orders initially to evaluate our products. Sample orders are available on request at cost.',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'What are your payment terms?',
@@ -48,9 +27,6 @@ return new class extends Migration
 <li><strong>Part Payment in Advance:</strong> For larger orders, we typically require 75% payment in advance. The balance is payable against delivery of documents through your bank. Bank charges involved in this method are payable by the customer.</li>
 <li><strong>Credit Cards:</strong> We accept credit card payments for smaller orders only.</li>
 </ol>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'What are your Bank Particulars?',
@@ -60,39 +36,24 @@ return new class extends Migration
 <strong>Beneficiary Name:</strong> ATICO INDIA<br>
 <strong>Branch Name:</strong> ICICI Bank, Ambala Cantt, Haryana, India</p>
 <p><strong>Note:</strong> Please inform us before and after sending any payment to our bank account.</p>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Please give some information on Shipping mode and charges?',
                 'description' => '<p>The normal modes of shipment are sea freight and air freight. We can also arrange air post parcel, sea post parcel, or courier dispatch upon special request.</p>
 <p>You may request prices inclusive of shipping costs, or we can ship goods on a freight-to-pay basis.</p>
 <p>Shipping charges depend on shipment size, destination, and mode of dispatch. C.I.F. rates can be quoted once you share the exact quantity, destination, and preferred dispatch method.</p>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'How can I get a Quote?',
                 'description' => '<p>Please <a href="' . $enquiryUrl . '">request a quote</a> using the enquiry form on our website, or <a href="' . $contactUrl . '">contact us</a> with your product list and requirements. Our team will respond with pricing and availability.</p>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'How can I get your Price List / Catalogue?',
                 'description' => '<p>Please <a href="' . $enquiryUrl . '">send an enquiry</a> or <a href="' . $contactUrl . '">contact us</a> with the categories or products you are interested in. We will share the relevant catalogue details and pricing based on your requirements.</p>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'Do you have ISO 9000, CE approvals?',
                 'description' => '<p>Yes, Atico India is an ISO 9001 and CE certified manufacturer. Please share your product requirements and we will confirm applicable certifications for the items you need.</p>',
-                'status' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
             ],
             [
                 'name' => 'How can I contact Atico India?',
@@ -103,15 +64,65 @@ return new class extends Migration
 <strong>Fax:</strong> +91-0171-4004736<br>
 <strong>Website:</strong> <a href="https://www.aticoindia.com" target="_blank" rel="noreferrer">www.aticoindia.com</a></p>
 <p>You can also use our <a href="' . $contactUrl . '">Contact Us</a> page or the enquiry form on this website.</p>',
+            ],
+        ];
+
+        foreach ($faqs as $faq) {
+            DB::table('faqs')
+                ->where('name', $faq['name'])
+                ->update([
+                    'description' => $faq['description'],
+                    'updated_at' => now(),
+                ]);
+        }
+
+        DB::table('faqs')
+            ->where('name', 'How can I contact Atico Export?')
+            ->update([
+                'name' => 'How can I contact Atico India?',
+                'description' => $faqs[7]['description'],
+                'updated_at' => now(),
+            ]);
+
+        foreach ($faqs as $faq) {
+            if (DB::table('faqs')->where('name', $faq['name'])->exists()) {
+                continue;
+            }
+
+            DB::table('faqs')->insert([
+                'name' => $faq['name'],
+                'description' => $faq['description'],
                 'status' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+            ]);
+        }
+
+        $contactFaqIds = DB::table('faqs')
+            ->where('name', 'How can I contact Atico India?')
+            ->orderBy('id')
+            ->pluck('id');
+
+        if ($contactFaqIds->count() > 1) {
+            DB::table('faqs')
+                ->whereIn('id', $contactFaqIds->slice(1)->values()->all())
+                ->delete();
+        }
+
+        DB::table('faqs')
+            ->where(function ($query): void {
+                $query->where('description', 'like', '%Advanced Technocracy%')
+                    ->orWhere('description', 'like', '%aticoexport%')
+                    ->orWhere('description', 'like', '%Atico Export%');
+            })
+            ->update([
+                'description' => DB::raw("REPLACE(REPLACE(REPLACE(description, 'Advanced Technocracy Inc.', 'Atico India'), 'ADVANCED TECHNOCRACY INC.', 'ATICO INDIA'), 'Atico Export', 'Atico India')"),
+                'updated_at' => now(),
+            ]);
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('faqs');
+        // FAQ content rollback is not restored to legacy branding.
     }
 };
