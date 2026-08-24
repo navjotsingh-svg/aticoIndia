@@ -1,16 +1,30 @@
 <aside class="sidebar-card catalog-sidebar blog-sidebar">
     <h3 class="sidebar-title sidebar-title--enquiry">Send Enquiry</h3>
-    <form class="sidebar-form" method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data">
+    <form class="sidebar-form" method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data" data-inquiry-form>
         @csrf
         @include('partials.inquiry-meta')
-        <input class="input" name="name" placeholder="Your Name" required value="{{ old('name') }}">
-        <input class="input" name="email" type="email" placeholder="Email" value="{{ old('email') }}">
-        <input class="input" name="mobile_no" placeholder="Phone Number" value="{{ old('mobile_no') }}">
-        @include('partials.inquiry-country')
-        <textarea name="message" rows="3" placeholder="Your message">{{ old('message') }}</textarea>
-        @include('partials.inquiry-attachment')
-        @include('partials.inquiry-recaptcha')
-        <button class="btn" type="submit">Submit</button>
+        @if (session('enquiry_success'))
+            <div class="form-success-state form-success-state--compact" role="status">
+                <p><i class="fa fa-check-circle" aria-hidden="true"></i> {{ session('success') }}</p>
+            </div>
+        @else
+            <input class="input @error('name') is-invalid @enderror" name="name" placeholder="Your Name *" required value="{{ old('name') }}">
+            @error('name')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            @include('partials.inquiry-contact-fields')
+            @include('partials.inquiry-country')
+            @error('country')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            <textarea name="message" rows="3" placeholder="Your message">{{ old('message') }}</textarea>
+            @include('partials.inquiry-attachment')
+            @include('partials.inquiry-recaptcha')
+            @error('g-recaptcha-response')
+                <span class="field-error">{{ $message }}</span>
+            @enderror
+            <button class="btn" type="submit">Submit</button>
+        @endif
     </form>
 
     @include('partials.sidebar-recent-posts')

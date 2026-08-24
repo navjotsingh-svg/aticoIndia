@@ -17,6 +17,9 @@ php artisan cache:clear
 echo "==> Running database migrations..."
 php artisan migrate --force
 
+echo "==> Generating XML sitemap..."
+php artisan sitemap:generate
+
 echo "==> Rebuilding optimized caches (optional, for production)..."
 php artisan config:cache
 php artisan route:cache

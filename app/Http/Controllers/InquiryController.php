@@ -20,14 +20,15 @@ class InquiryController extends Controller
 
     public function contact(Request $request): RedirectResponse
     {
-        $data = $request->validate(array_merge($this->sharedInquiryRules(), [
-            'name' => 'required|string|max:1000',
-            'email' => 'nullable|email|max:1000',
-            'mobile_no' => 'nullable|string|max:1000',
-            'message' => 'nullable|string',
-            'page_url' => 'nullable|string|max:2000',
-            'ip_address' => 'nullable|string|max:100',
-        ], $this->inquiryMail->attachmentRules()));
+        $data = $request->validate(
+            array_merge($this->sharedInquiryRules(), $this->contactIdentityRules(), [
+                'name' => 'required|string|max:1000',
+                'message' => 'nullable|string',
+                'page_url' => 'nullable|string|max:2000',
+                'ip_address' => 'nullable|string|max:100',
+            ], $this->inquiryMail->attachmentRules()),
+            $this->inquiryMessages(),
+        );
 
         $filePath = $this->inquiryMail->storeAttachment($request);
         $data['file_name'] = $filePath;
@@ -36,21 +37,24 @@ class InquiryController extends Controller
 
         $this->inquiryMail->sendContactEnquiry($data, $filePath, $this->inquiryMail->pageMeta($request));
 
-        return back()->with('success', 'Thank you. Your enquiry was submitted.');
+        return back()->with($this->enquirySuccessResponse(
+            'Thank you. Your enquiry was submitted successfully. Our team will contact you shortly.'
+        ));
     }
 
     public function product(Request $request): RedirectResponse
     {
-        $data = $request->validate(array_merge($this->sharedInquiryRules(), [
-            'product_id' => 'nullable|integer',
-            'name' => 'required|string|max:1000',
-            'email' => 'nullable|email|max:1000',
-            'phone_number' => 'nullable|string|max:1000',
-            'quantity' => 'nullable|string|max:100',
-            'message' => 'nullable|string|max:1000',
-            'page_url' => 'nullable|string|max:2000',
-            'ip_address' => 'nullable|string|max:100',
-        ], $this->inquiryMail->attachmentRules()));
+        $data = $request->validate(
+            array_merge($this->sharedInquiryRules(), $this->productIdentityRules(), [
+                'product_id' => 'nullable|integer',
+                'name' => 'required|string|max:1000',
+                'quantity' => 'nullable|string|max:100',
+                'message' => 'nullable|string|max:1000',
+                'page_url' => 'nullable|string|max:2000',
+                'ip_address' => 'nullable|string|max:100',
+            ], $this->inquiryMail->attachmentRules()),
+            $this->inquiryMessages(),
+        );
 
         $filePath = $this->inquiryMail->storeAttachment($request);
         $data['file_name'] = $filePath;
@@ -64,20 +68,27 @@ class InquiryController extends Controller
 
         $this->inquiryMail->sendProductQuery($data, $productName, $this->inquiryMail->pageMeta($request));
 
-        return back()->with('success', 'Product query submitted successfully.');
+        return back()->with(array_merge(
+            $this->enquirySuccessResponse('Product query submitted successfully. Our team will contact you shortly.'),
+            [
+                'product_query_success' => true,
+                'product_query_id' => $data['product_id'] ?? null,
+            ]
+        ));
     }
 
     public function requestQuote(Request $request): RedirectResponse
     {
-        $data = $request->validate(array_merge($this->sharedInquiryRules(), [
-            'name' => 'required|string|max:1000',
-            'email' => 'nullable|email|max:1000',
-            'mobile_no' => 'nullable|string|max:1000',
-            'product' => 'nullable|string|max:1000',
-            'query' => 'nullable|string',
-            'page_url' => 'nullable|string|max:2000',
-            'ip_address' => 'nullable|string|max:100',
-        ], $this->inquiryMail->attachmentRules()));
+        $data = $request->validate(
+            array_merge($this->sharedInquiryRules(), $this->contactIdentityRules(), [
+                'name' => 'required|string|max:1000',
+                'product' => 'nullable|string|max:1000',
+                'query' => 'nullable|string',
+                'page_url' => 'nullable|string|max:2000',
+                'ip_address' => 'nullable|string|max:100',
+            ], $this->inquiryMail->attachmentRules()),
+            $this->inquiryMessages(),
+        );
 
         $filePath = $this->inquiryMail->storeAttachment($request);
         $data['file_name'] = $filePath;
@@ -91,19 +102,22 @@ class InquiryController extends Controller
             'Quote Request Received',
         );
 
-        return back()->with('success', 'Quote request submitted successfully.');
+        return back()->with($this->enquirySuccessResponse(
+            'Quote request submitted successfully. Our team will contact you shortly.'
+        ));
     }
 
     public function quoteEnquiry(Request $request): RedirectResponse
     {
-        $data = $request->validate(array_merge($this->sharedInquiryRules(), [
-            'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone_number' => 'nullable|string|max:30',
-            'massage' => 'nullable|string',
-            'page_url' => 'nullable|string|max:2000',
-            'ip_address' => 'nullable|string|max:100',
-        ], $this->inquiryMail->attachmentRules()));
+        $data = $request->validate(
+            array_merge($this->sharedInquiryRules(), $this->productIdentityRules(), [
+                'name' => 'required|string|max:255',
+                'massage' => 'nullable|string',
+                'page_url' => 'nullable|string|max:2000',
+                'ip_address' => 'nullable|string|max:100',
+            ], $this->inquiryMail->attachmentRules()),
+            $this->inquiryMessages(),
+        );
 
         $filePath = $this->inquiryMail->storeAttachment($request);
 
@@ -122,7 +136,54 @@ class InquiryController extends Controller
             'Quote Enquiry Received',
         );
 
-        return back()->with('success', 'Quote enquiry submitted successfully.');
+        return back()->with($this->enquirySuccessResponse(
+            'Quote enquiry submitted successfully. Our team will contact you shortly.'
+        ));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function contactIdentityRules(): array
+    {
+        return [
+            'email' => 'nullable|email|max:1000|required_without:mobile_no',
+            'mobile_no' => 'nullable|string|max:1000|required_without:email',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function productIdentityRules(): array
+    {
+        return [
+            'email' => 'nullable|email|max:1000|required_without:phone_number',
+            'phone_number' => 'nullable|string|max:1000|required_without:email',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function inquiryMessages(): array
+    {
+        return [
+            'email.required_without' => 'Please provide an email address or phone number so we can contact you.',
+            'mobile_no.required_without' => 'Please provide an email address or phone number so we can contact you.',
+            'phone_number.required_without' => 'Please provide an email address or phone number so we can contact you.',
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function enquirySuccessResponse(string $message): array
+    {
+        return [
+            'success' => $message,
+            'enquiry_success' => true,
+        ];
     }
 
     /**

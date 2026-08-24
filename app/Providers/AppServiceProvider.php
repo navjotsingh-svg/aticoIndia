@@ -74,6 +74,20 @@ class AppServiceProvider extends ServiceProvider
             'terms-service',
             'certificates',
             'about',
+            'errors.*',
         ], $catalogNav);
+
+        View::composer('errors.404', function ($view): void {
+            $view->with(
+                'featuredCategories',
+                Category::query()
+                    ->whereNull('deleted_at')
+                    ->where('status', 1)
+                    ->whereIn('parent_id', ['0', 0, null])
+                    ->orderBy('sort')
+                    ->limit(8)
+                    ->get()
+            );
+        });
     }
 }

@@ -24,29 +24,28 @@
                     </div>
                 </aside>
 
-                <div class="enquiry-modal-form-wrap">
+                <div class="enquiry-modal-form-wrap" @if(session('enquiry_success')) hidden @endif>
                     <h3 class="enquiry-modal-form-title">Send Enquiry</h3>
                     <p class="enquiry-modal-form-lead">Fill in your details and we will get back to you shortly.</p>
 
-                    <form class="enquiry-modal-form" method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data">
+                    <form class="enquiry-modal-form" method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data" data-inquiry-form>
                         @csrf
                         @include('partials.inquiry-meta')
                         <div class="enquiry-form-grid">
                             <label class="enquiry-field">
                                 <span class="enquiry-field-label">Full Name <em>*</em></span>
-                                <input class="input" name="name" placeholder="Your name" required value="{{ old('name') }}">
+                                <input class="input @error('name') is-invalid @enderror" name="name" placeholder="Your name" required value="{{ old('name') }}">
+                                @error('name')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
                             </label>
-                            <label class="enquiry-field">
-                                <span class="enquiry-field-label">Email</span>
-                                <input class="input" type="email" name="email" placeholder="you@company.com" value="{{ old('email') }}">
-                            </label>
-                            <label class="enquiry-field">
-                                <span class="enquiry-field-label">Phone</span>
-                                <input class="input" name="mobile_no" placeholder="+91 98765 43210" value="{{ old('mobile_no') }}">
-                            </label>
+                            @include('partials.inquiry-contact-fields', ['layout' => 'grid'])
                             <label class="enquiry-field">
                                 <span class="enquiry-field-label">Country <em>*</em></span>
                                 @include('partials.inquiry-country')
+                                @error('country')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
                             </label>
                         </div>
                         <label class="enquiry-field enquiry-field--full">
@@ -55,6 +54,9 @@
                         </label>
                         @include('partials.inquiry-attachment')
                         @include('partials.inquiry-recaptcha')
+                        @error('g-recaptcha-response')
+                            <span class="field-error">{{ $message }}</span>
+                        @enderror
                         <button class="btn btn-enquiry-submit" type="submit">
                             <span>Submit Enquiry</span>
                             <i class="fa fa-paper-plane" aria-hidden="true"></i>
@@ -64,6 +66,15 @@
                             <a href="mailto:sales@aticoindia.com">sales@aticoindia.com</a> for a custom quotation.
                         </p>
                     </form>
+                </div>
+
+                <div class="enquiry-modal-success" @if(!session('enquiry_success')) hidden @endif>
+                    <div class="enquiry-success-icon" aria-hidden="true">
+                        <i class="fa fa-check-circle"></i>
+                    </div>
+                    <h3>Enquiry Submitted</h3>
+                    <p>{{ session('success', 'Thank you. Your enquiry was submitted successfully. Our team will contact you shortly.') }}</p>
+                    <button type="button" class="btn" data-close-enquiry>Close</button>
                 </div>
             </div>
         </div>

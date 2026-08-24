@@ -47,18 +47,34 @@ page-catalog
                 <h3>Drop Us a Line</h3>
                 <p class="muted">Fill in the form below and we will get back to you shortly.</p>
 
-                <form method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data">
-                    @csrf
-                    @include('partials.inquiry-meta')
-                    <input class="input" name="name" placeholder="Your Name *" required value="{{ old('name') }}">
-                    <input class="input" type="email" name="email" placeholder="Email Address" value="{{ old('email') }}">
-                    <input class="input" name="mobile_no" placeholder="Phone Number" value="{{ old('mobile_no') }}">
-                    @include('partials.inquiry-country')
-                    <textarea name="message" rows="5" placeholder="How can we help?">{{ old('message') }}</textarea>
-                    @include('partials.inquiry-attachment')
-                    @include('partials.inquiry-recaptcha')
-                    <button class="btn btn-block" type="submit">Send Message</button>
-                </form>
+                @if (session('enquiry_success'))
+                    <div class="form-success-state" role="status">
+                        <div class="form-success-icon" aria-hidden="true"><i class="fa fa-check-circle"></i></div>
+                        <h4>Thank You</h4>
+                        <p>{{ session('success') }}</p>
+                    </div>
+                @else
+                    <form method="post" action="{{ route('enquiry.store') }}" enctype="multipart/form-data" data-inquiry-form>
+                        @csrf
+                        @include('partials.inquiry-meta')
+                        <input class="input @error('name') is-invalid @enderror" name="name" placeholder="Your Name *" required value="{{ old('name') }}">
+                        @error('name')
+                            <span class="field-error">{{ $message }}</span>
+                        @enderror
+                        @include('partials.inquiry-contact-fields')
+                        @include('partials.inquiry-country')
+                        @error('country')
+                            <span class="field-error">{{ $message }}</span>
+                        @enderror
+                        <textarea name="message" rows="5" placeholder="How can we help?">{{ old('message') }}</textarea>
+                        @include('partials.inquiry-attachment')
+                        @include('partials.inquiry-recaptcha')
+                        @error('g-recaptcha-response')
+                            <span class="field-error">{{ $message }}</span>
+                        @enderror
+                        <button class="btn btn-block" type="submit">Send Message</button>
+                    </form>
+                @endif
             </div>
         </div>
     </section>

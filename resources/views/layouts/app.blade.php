@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha512-SfTiTlX6kk+qitfevl/7LibUOeJWlt9rbyDn92a1DqWOw9vWG2MFoays0sgObmWazO5BQPiFucnnEAjpAB+/Sw==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=39">
+    <link rel="stylesheet" href="{{ asset('css/site.css') }}?v=41">
 </head>
 @php
     $currentSlug = request()->route('slug');
@@ -374,6 +374,19 @@
     const modal = document.getElementById('enquiryModal');
     if (!modal) return;
 
+    const formWrap = modal.querySelector('.enquiry-modal-form-wrap');
+    const successWrap = modal.querySelector('.enquiry-modal-success');
+
+    const showSuccess = () => {
+        formWrap?.setAttribute('hidden', 'hidden');
+        successWrap?.removeAttribute('hidden');
+    };
+
+    const showForm = () => {
+        successWrap?.setAttribute('hidden', 'hidden');
+        formWrap?.removeAttribute('hidden');
+    };
+
     const open = () => {
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
@@ -411,9 +424,29 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
     }
 
+    @if(session('enquiry_success'))
+        open();
+        showSuccess();
+    @endif
+
     @if($errors->hasAny(['name', 'email', 'mobile_no', 'country', 'message', 'g-recaptcha-response']))
+        showForm();
         open();
     @endif
+
+    modal.querySelectorAll('form[data-inquiry-form]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const email = form.querySelector('[name="email"]');
+            const phone = form.querySelector('[name="mobile_no"], [name="phone_number"]');
+            const emailValue = email instanceof HTMLInputElement ? email.value.trim() : '';
+            const phoneValue = phone instanceof HTMLInputElement ? phone.value.trim() : '';
+
+            if (emailValue === '' && phoneValue === '') {
+                event.preventDefault();
+                window.alert('Please provide an email address or phone number so we can contact you.');
+            }
+        });
+    });
 })();
 </script>
 @if(request()->routeIs('home'))
