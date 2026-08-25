@@ -5585,9 +5585,12 @@ body.modal-open {
         display: none;
     }
     .enquiry-modal-dialog {
-        top: 40px;
+        top: 70px;
     }
-    
+    .home-industry-slide {
+        background-size: 100%;
+    }
+
 }
 
 
