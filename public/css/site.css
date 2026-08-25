@@ -5584,6 +5584,10 @@ body.modal-open {
     .enquiry-modal-layout .enquiry-modal-aside{
         display: none;
     }
+    .enquiry-modal-dialog {
+        top: 40px;
+    }
+    
 }
 
 
