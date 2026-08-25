@@ -5581,6 +5581,9 @@ body.modal-open {
         width: 100%;
         justify-content: center;
     }
+    .enquiry-modal-layout .enquiry-modal-aside{
+        display: none;
+    }
 }
 
 
