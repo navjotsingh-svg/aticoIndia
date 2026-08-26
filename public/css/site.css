@@ -5563,7 +5563,9 @@ body.modal-open {
         grid-template-columns: repeat(2, 1fr);
     }
 }
-
+.mobile_slide{
+    display: none !important;
+}
 @media (max-width: 640px) {
     .error-code { font-size: 56px; }
     .error-hero h1 { font-size: 28px; }
@@ -5590,7 +5592,12 @@ body.modal-open {
     .home-industry-slide {
         background-size: 100%;
     }
-
+    .desktop_slide{
+        display: none !important;
+    }
+    .mobile_slide{
+        display: block !important;
+    }  
 }
 
 

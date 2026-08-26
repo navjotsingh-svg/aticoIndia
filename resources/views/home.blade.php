@@ -12,7 +12,7 @@ page-home
 @endsection
 
 @section('content')
-    <section class="home-industry-hero" aria-label="Industries we serve">
+    <section class="home-industry-hero desktop_slide" aria-label="Industries we serve">
         <div class="home-industry-slider">
             @foreach ($industrySlides as $index => $slide)
                 @php
@@ -45,6 +45,9 @@ page-home
                 <i class="fa fa-chevron-right" aria-hidden="true"></i>
             </button>
         </div>
+    </section>
+    <section class="mobile_slide">
+        <img src="{{ asset('assets/frontend/images/mob1.webp') }}" style="width:100%;">
     </section>
 
     <section class="home-quick-actions" aria-label="Quick links">
